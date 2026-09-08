@@ -104,7 +104,7 @@ export default async function AdminClassView({
             <Link href={`/c/${cls.slug}`} target="_blank" className="text-primary font-mono hover:underline flex items-center gap-1">
               /c/{cls.slug} <ExternalLink size={14} />
             </Link>
-            <CopyButton text={classUrl} />
+            <CopyButton path={`/c/${cls.slug}`} text={classUrl} />
           </div>
         </div>
       </div>
