@@ -27,6 +27,16 @@ export default function ClientLanding({ cls, albumPages, albumPhotos, config }: 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent Ctrl+S, Cmd+S (Save), Ctrl+P, Cmd+P (Print), Ctrl+U, Cmd+U (View Source)
+      if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const slideInUp = {
@@ -53,7 +63,10 @@ export default function ClientLanding({ cls, albumPages, albumPhotos, config }: 
   const whyImage = config.whyClassbook.image || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=2070&auto=format&fit=crop'
 
   return (
-    <main className="w-full bg-[#1E1E1E] text-white overflow-x-hidden">
+    <main
+      className="w-full bg-[#1E1E1E] text-white overflow-x-hidden select-none no-save-photo"
+      onContextMenu={(e) => e.preventDefault()}
+    >
       {/* Hero Section */}
       <section className="relative flex items-center justify-center min-h-screen pt-20 pb-20 bg-black/60 bg-blend-overlay" style={{
         backgroundImage: `url('${heroBg}')`,
@@ -94,30 +107,32 @@ export default function ClientLanding({ cls, albumPages, albumPhotos, config }: 
       <section className="bg-primary pt-4 pb-16">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 h-auto md:h-[600px]">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft} className="relative group overflow-hidden h-[400px] md:h-full">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft} className="relative group overflow-hidden h-[400px] md:h-full select-none">
               <Image
                 src="https://images.unsplash.com/photo-1544644799-c8ce6a6a090e?q=80&w=2070&auto=format&fit=crop"
                 alt="Photobook cover"
                 fill
-                unoptimized
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                quality={55}
+                draggable={false}
+                className="object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none select-none"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 z-10">
                 <div className="border border-white/20 p-8 w-full h-full flex items-center justify-center">
                   <h3 className="text-white text-center uppercase tracking-[0.2em] font-sans font-medium text-lg md:text-xl leading-relaxed">Красивая твёрдая обложка</h3>
                 </div>
               </div>
             </motion.div>
 
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInRight} className="relative group overflow-hidden h-[400px] md:h-full">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInRight} className="relative group overflow-hidden h-[400px] md:h-full select-none">
               <Image
                 src="https://images.unsplash.com/photo-1497633762265-9d179a990aa6?q=80&w=2073&auto=format&fit=crop"
                 alt="Photobook inside"
                 fill
-                unoptimized
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                quality={55}
+                draggable={false}
+                className="object-cover transition-transform duration-700 group-hover:scale-105 pointer-events-none select-none"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300 flex items-center justify-center p-6 opacity-0 group-hover:opacity-100 z-10">
                 <div className="border border-white/20 p-8 w-full h-full flex items-center justify-center">
                   <h3 className="text-white text-center uppercase tracking-[0.2em] font-sans font-medium text-lg md:text-xl leading-relaxed">Страницы, наполненные воспоминаниями</h3>
                 </div>
@@ -131,14 +146,16 @@ export default function ClientLanding({ cls, albumPages, albumPhotos, config }: 
       <section className="py-16 md:py-24 bg-[#1E1E1E]">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col md:flex-row items-center gap-12">
-            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft} className="w-full md:w-1/2 order-2 md:order-1 h-[500px] md:h-[700px] relative">
+            <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInLeft} className="w-full md:w-1/2 order-2 md:order-1 h-[500px] md:h-[700px] relative select-none">
               <Image
                 src={whyImage}
                 alt="Kids"
                 fill
-                unoptimized
-                className="object-cover"
+                quality={55}
+                draggable={false}
+                className="object-cover pointer-events-none select-none"
               />
+              <div className="absolute inset-0 z-10 pointer-events-auto" onContextMenu={(e) => e.preventDefault()} />
             </motion.div>
 
             <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={slideInRight} className="w-full md:w-1/2 order-1 md:order-2">
@@ -207,12 +224,21 @@ export default function ClientLanding({ cls, albumPages, albumPhotos, config }: 
                     image: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?q=80&w=2070&auto=format&fit=crop"
                   }
                 ].map((card) => (
-                  <div key={card.title} className="relative group overflow-hidden aspect-[4/3]">
-                    <Image src={card.image} alt={card.title} fill unoptimized className="object-cover transition-transform duration-500 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-center">
+                  <div key={card.title} className="relative group overflow-hidden aspect-[4/3] select-none">
+                    <Image
+                      src={card.image}
+                      alt={card.title}
+                      fill
+                      quality={55}
+                      draggable={false}
+                      className="object-cover transition-transform duration-500 group-hover:scale-110 pointer-events-none select-none"
+                    />
+                    <div className="absolute inset-0 bg-primary/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-center z-10">
                       <h6 className="uppercase font-bold text-white mb-2 font-sans text-lg">{card.title}</h6>
                       {card.text ? <p className="text-white/80 font-sans text-sm leading-relaxed">{card.text}</p> : null}
                     </div>
+                    {/* Transparent shield */}
+                    <div className="absolute inset-0 z-20 pointer-events-auto" onContextMenu={(e) => e.preventDefault()} />
                   </div>
                 ))}
               </div>

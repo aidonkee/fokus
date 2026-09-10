@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import type { AlbumPage, AlbumPhoto } from "@/lib/album";
@@ -28,7 +29,7 @@ function getCols(w: number): number {
 }
 
 /* ────────────────────────────────────────────────────────────
-   ClassBook Component
+   ClassBook Component with Anti-Theft Protection
    ──────────────────────────────────────────────────────────── */
 
 export default function ClassBook({ title, photos }: ClassBookProps) {
@@ -105,7 +106,7 @@ export default function ClassBook({ title, photos }: ClassBookProps) {
   return (
     <>
       {/* Yellow Header Banner */}
-      <section className="bg-primary py-8 md:py-10">
+      <section className="bg-primary py-8 md:py-10 select-none">
         <div className="container mx-auto px-4 max-w-6xl flex items-center">
           <h2 className="flex-1 text-lg sm:text-xl md:text-2xl lg:text-[1.65rem] font-bold text-[#1E1E1E] leading-snug">
             {title}
@@ -115,7 +116,7 @@ export default function ClassBook({ title, photos }: ClassBookProps) {
       </section>
 
       {/* Spreads Grid Section */}
-      <section className="bg-[#1E1E1E] py-10 md:py-14">
+      <section className="bg-[#1E1E1E] py-10 md:py-14 select-none no-save-photo">
         <div className="container mx-auto px-4 max-w-[1340px]">
           <AnimatePresence mode="wait">
             <motion.div
@@ -140,16 +141,24 @@ export default function ClassBook({ title, photos }: ClassBookProps) {
                 <div
                   key={photo.id || idx}
                   onClick={() => setLightbox(photo)}
-                  className="group relative aspect-[2000/1384] bg-white p-[2px] sm:p-[3px] cursor-pointer overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:z-10"
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="group relative aspect-[2000/1384] bg-white p-[2px] sm:p-[3px] cursor-pointer overflow-hidden shadow-sm transition-all duration-300 hover:shadow-xl hover:z-10 select-none no-save-photo"
                 >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <Image
                     src={photo.url}
                     alt={`Разворот ${safeView * perView + idx + 1}`}
+                    fill
+                    sizes="(max-width: 600px) 50vw, (max-width: 900px) 33vw, (max-width: 1200px) 25vw, 17vw"
+                    quality={45} // Slightly compressed quality for fast loading & theft prevention
                     loading="lazy"
-                    decoding="async"
                     draggable={false}
-                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter,transform] duration-300 group-hover:scale-[1.02]"
+                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-[filter,transform] duration-300 group-hover:scale-[1.02] pointer-events-none select-none"
+                  />
+                  {/* Invisible Protective Shield Overlay (blocks right click & image dragging) */}
+                  <div
+                    className="absolute inset-0 z-10 select-none pointer-events-auto"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
                   />
                 </div>
               ))}
@@ -179,23 +188,24 @@ export default function ClassBook({ title, photos }: ClassBookProps) {
         </div>
       </section>
 
-      {/* Lightbox Modal */}
+      {/* Protected Lightbox Modal */}
       <AnimatePresence>
         {lightbox && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 md:p-12"
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 md:p-12 select-none no-save-photo"
             role="dialog"
             aria-modal="true"
             aria-label="Просмотр разворота"
             onClick={() => setLightbox(null)}
+            onContextMenu={(e) => e.preventDefault()}
           >
             {/* Close button */}
             <button
               ref={closeRef}
-              className="absolute top-4 right-4 text-white z-10 p-2 rounded-full hover:bg-white/10 transition"
+              className="absolute top-4 right-4 text-white z-30 p-2 rounded-full hover:bg-white/10 transition"
               onClick={(e) => {
                 e.stopPropagation();
                 setLightbox(null);
@@ -206,13 +216,13 @@ export default function ClassBook({ title, photos }: ClassBookProps) {
             </button>
 
             {/* Counter */}
-            <div className="absolute top-5 left-1/2 -translate-x-1/2 text-zinc-400 text-sm font-mono z-10 select-none">
+            <div className="absolute top-5 left-1/2 -translate-x-1/2 text-zinc-400 text-sm font-mono z-30 select-none">
               {lbIndex + 1} / {photos.length}
             </div>
 
             {/* Prev button */}
             <button
-              className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-10 bg-black/60 text-white rounded-full p-2 md:p-3 transition hover:bg-white/20"
+              className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-30 bg-black/60 text-white rounded-full p-2 md:p-3 transition hover:bg-white/20"
               onClick={(e) => {
                 e.stopPropagation();
                 goLightbox(-1);
@@ -222,28 +232,46 @@ export default function ClassBook({ title, photos }: ClassBookProps) {
               <ChevronLeft size={28} />
             </button>
 
-            {/* Main Image */}
+            {/* Main Image with Anti-Theft Shield and Controlled Preview Quality */}
             <div
-              className="relative w-full h-full max-w-6xl max-h-[85vh] flex items-center justify-center p-2"
+              className="relative w-full h-full max-w-5xl max-h-[82vh] flex items-center justify-center p-2 select-none"
               onClick={(e) => e.stopPropagation()}
+              onContextMenu={(e) => e.preventDefault()}
             >
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={lightbox.id}
-                  src={lightbox.url}
-                  alt={`Разворот ${lbIndex + 1}`}
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.96 }}
-                  transition={{ duration: 0.2 }}
-                  className="max-w-full max-h-full object-contain shadow-2xl bg-white p-1"
-                />
-              </AnimatePresence>
+              <div className="relative w-full h-full max-h-[80vh] flex items-center justify-center">
+                <div className="relative w-full h-full max-w-full max-h-full aspect-[2000/1384] shadow-2xl bg-white p-1 select-none overflow-hidden">
+                  <Image
+                    key={lightbox.id}
+                    src={lightbox.url}
+                    alt={`Разворот ${lbIndex + 1}`}
+                    fill
+                    quality={50} // Reduced web preview quality (softened, unusable for print reproduction)
+                    sizes="(max-width: 1024px) 100vw, 1200px"
+                    className="object-contain pointer-events-none select-none"
+                    draggable={false}
+                    priority
+                  />
+
+                  {/* Anti-Theft Watermark Protection */}
+                  <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none select-none opacity-20">
+                    <span className="text-white text-base sm:text-xl md:text-2xl font-bold uppercase tracking-[0.25em] rotate-[-12deg] drop-shadow-md border border-white/40 px-6 py-2 rounded">
+                      Классбук • Предпросмотр
+                    </span>
+                  </div>
+
+                  {/* Protective Transparent Shield Over Image (intercepts right-click and dragging) */}
+                  <div
+                    className="absolute inset-0 z-20 select-none pointer-events-auto cursor-default"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Next button */}
             <button
-              className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10 bg-black/60 text-white rounded-full p-2 md:p-3 transition hover:bg-white/20"
+              className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-30 bg-black/60 text-white rounded-full p-2 md:p-3 transition hover:bg-white/20"
               onClick={(e) => {
                 e.stopPropagation();
                 goLightbox(1);
