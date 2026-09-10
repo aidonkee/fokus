@@ -14,7 +14,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Классбук 6Б 1366 школа, Москва",
+  title: "wfokus",
   description: "Современные школьные фотокниги в стиле кино, наполненные атмосферой, эмоциями и дружбой вашего класса.",
 };
 
